@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f5f0" />
+    <meta name="description" content="Un contador de rachas sencillo y privado." />
+    <title>Mi racha</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <span class="brand">mi racha</span>
+        <span class="status-dot" aria-label="Los datos se guardan en este dispositivo"></span>
+      </header>
+
+      <section class="hero" aria-labelledby="streak-title">
+        <div class="flame" aria-hidden="true">
+          <svg viewBox="0 0 120 144" role="img">
+            <path class="flame-outer" d="M72.8 5.2c4.3 28.1-12 37.1-17.2 55.2-3.6-9.2-1.9-19.1 2.3-29.5C35.6 44.7 20 66.1 20 91.4 20 119.9 37.9 139 60.5 139S101 120.2 101 91.5c0-27.1-17.6-47.9-28.2-86.3Z" />
+            <path class="flame-inner" d="M62 69c1.1 13.8-9.5 20.3-9.5 31.1 0 7.5 4.2 13.8 10.7 13.8 7.7 0 12.8-7.6 12.8-16.8C76 87.5 70.2 77.8 62 69Z" />
+          </svg>
+          <span id="day-count" class="day-count">0</span>
+        </div>
+        <p class="eyebrow">Racha actual</p>
+        <h1 id="streak-title"><span id="day-label">0 días</span> contigo</h1>
+        <p id="encouragement" class="encouragement">Todo gran hábito empieza con un día.</p>
+      </section>
+
+      <section class="dates" aria-label="Fechas de la racha">
+        <div>
+          <span>Inicio</span>
+          <strong id="start-date">—</strong>
+        </div>
+        <div class="date-line" aria-hidden="true"><span></span></div>
+        <div>
+          <span>Final</span>
+          <strong id="end-date">En curso</strong>
+        </div>
+      </section>
+
+      <section class="calendar-card" aria-labelledby="month-label">
+        <div class="calendar-header">
+          <button id="prev-month" class="icon-button" type="button" aria-label="Mes anterior">←</button>
+          <h2 id="month-label"></h2>
+          <button id="next-month" class="icon-button" type="button" aria-label="Mes siguiente">→</button>
+        </div>
+        <div class="weekdays" aria-hidden="true">
+          <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+        </div>
+        <div id="calendar-grid" class="calendar-grid" role="grid" aria-label="Calendario de la racha"></div>
+      </section>
+
+      <div class="actions">
+        <button id="add-day" class="primary-button" type="button">
+          <span>Registrar un día más</span>
+          <span aria-hidden="true">＋</span>
+        </button>
+        <button id="finish-streak" class="text-button" type="button" disabled>Terminar racha</button>
+      </div>
+    </main>
+
+    <dialog id="finish-dialog">
+      <div class="dialog-content">
+        <div class="dialog-icon" aria-hidden="true">✓</div>
+        <h2>¿Terminar esta racha?</h2>
+        <p>Tu progreso quedará guardado y la fecha final será registrada.</p>
+        <div class="dialog-actions">
+          <button id="cancel-finish" class="secondary-button" type="button">Seguir contando</button>
+          <button id="confirm-finish" class="danger-button" type="button">Sí, terminar</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

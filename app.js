@@ -32,7 +32,7 @@ const elements = {
 document.querySelector("#prev-month").addEventListener("click", () => changeMonth(-1));
 document.querySelector("#next-month").addEventListener("click", () => changeMonth(1));
 elements.add.addEventListener("click", openNoteDialog);
-elements.finish.addEventListener("click", () => elements.dialog.showModal());
+elements.finish.addEventListener("click", handleStreakAction);
 elements.noteInput.addEventListener("input", updateNoteForm);
 elements.noteForm.addEventListener("submit", submitNote);
 elements.cancelNote.addEventListener("click", closeNoteDialog);
@@ -45,10 +45,27 @@ elements.dialog.addEventListener("click", (event) => {
 render();
 
 function openNoteDialog() {
-  if (state.finishedAt) return;
-  const nextDate = state.startedAt ? addDays(parseDate(state.startedAt), state.days) : today;
-  elements.noteDate.textContent = shortDate(nextDate);
+  if (state.finishedAt || hasRegisteredToday()) return;
+  elements.noteDate.textContent = shortDate(today);
   elements.noteDialog.showModal();
+}
+
+function handleStreakAction() {
+  if (state.finishedAt) {
+    startNewStreak();
+    return;
+  }
+  elements.dialog.showModal();
+}
+
+function startNewStreak() {
+  state.currentStreakId = createStreakId();
+  state.days = 0;
+  state.startedAt = null;
+  state.finishedAt = null;
+  viewedMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  saveState();
+  render();
 }
 
 function closeNoteDialog() {
@@ -72,7 +89,7 @@ function submitNote(event) {
 }
 
 function registerDay(note) {
-  if (state.finishedAt) return;
+  if (state.finishedAt || hasRegisteredToday()) return;
 
   if (!state.startedAt) {
     state.startedAt = dateKey(today);
@@ -81,9 +98,8 @@ function registerDay(note) {
     state.days += 1;
   }
 
-  const latest = addDays(parseDate(state.startedAt), state.days - 1);
-  state.notes.push({ date: dateKey(latest), text: note });
-  viewedMonth = new Date(latest.getFullYear(), latest.getMonth(), 1);
+  state.notes.push({ date: dateKey(today), text: note, streakId: state.currentStreakId });
+  viewedMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   saveState();
   render();
   pulseCount();
@@ -91,7 +107,7 @@ function registerDay(note) {
 
 function finishStreak() {
   if (!state.startedAt || state.finishedAt) return;
-  state.finishedAt = dateKey(addDays(parseDate(state.startedAt), state.days - 1));
+  state.finishedAt = dateKey(today);
   saveState();
   elements.dialog.close();
   render();
@@ -104,13 +120,19 @@ function changeMonth(offset) {
 
 function render() {
   const count = state.days || 0;
+  const registeredToday = hasRegisteredToday();
   elements.count.textContent = count;
   elements.label.textContent = `${count} ${count === 1 ? "día" : "días"}`;
   elements.start.textContent = state.startedAt ? shortDate(parseDate(state.startedAt)) : "—";
   elements.end.textContent = state.finishedAt ? shortDate(parseDate(state.finishedAt)) : "En curso";
-  elements.add.disabled = Boolean(state.finishedAt);
-  elements.add.querySelector("span:first-child").textContent = state.finishedAt ? "Racha terminada" : "Registrar un día más";
-  elements.finish.disabled = !state.startedAt || Boolean(state.finishedAt);
+  elements.add.disabled = Boolean(state.finishedAt) || registeredToday;
+  elements.add.querySelector("span:first-child").textContent = state.finishedAt
+    ? "Racha terminada"
+    : registeredToday
+      ? "Día de hoy registrado"
+      : "Registrar un día más";
+  elements.finish.disabled = !state.startedAt && !state.finishedAt;
+  elements.finish.textContent = state.finishedAt ? "Iniciar nueva racha" : "Terminar racha";
   elements.message.textContent = messageFor(count, Boolean(state.finishedAt));
   renderCalendar();
   renderNotes();
@@ -150,13 +172,15 @@ function renderCalendar() {
   const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
   const gridStart = new Date(year, month, 1 - firstWeekday);
   const streakStart = state.startedAt ? parseDate(state.startedAt) : null;
-  const streakLast = streakStart ? addDays(streakStart, state.days - 1) : null;
+  const currentDates = new Set(
+    state.notes.filter((note) => note.streakId === state.currentStreakId).map((note) => note.date),
+  );
 
   for (let index = 0; index < 42; index += 1) {
     const date = addDays(gridStart, index);
     const cell = document.createElement("span");
     const isCurrentMonth = date.getMonth() === month;
-    const isInStreak = streakStart && date >= streakStart && date <= streakLast;
+    const isInStreak = currentDates.has(dateKey(date));
     const classes = ["calendar-day"];
 
     if (!isCurrentMonth) classes.push("muted");
@@ -177,15 +201,26 @@ function loadState() {
   try {
     const value = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (value && Number.isInteger(value.days) && value.days >= 0) {
+      value.currentStreakId = value.currentStreakId || "streak-initial";
       value.notes = Array.isArray(value.notes)
-        ? value.notes.filter((note) => note && typeof note.date === "string" && typeof note.text === "string")
+        ? value.notes
+            .filter((note) => note && typeof note.date === "string" && typeof note.text === "string")
+            .map((note) => ({ ...note, streakId: note.streakId || value.currentStreakId }))
         : [];
       return value;
     }
   } catch (error) {
     console.warn("No fue posible recuperar la racha guardada.", error);
   }
-  return { days: 0, startedAt: null, finishedAt: null, notes: [] };
+  return { days: 0, startedAt: null, finishedAt: null, notes: [], currentStreakId: createStreakId() };
+}
+
+function hasRegisteredToday() {
+  return state.notes.some((note) => note.date === dateKey(today));
+}
+
+function createStreakId() {
+  return `streak-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function saveState() {

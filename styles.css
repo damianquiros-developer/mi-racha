@@ -96,6 +96,7 @@ h1 {
   font-weight: 600;
   letter-spacing: -0.055em;
   line-height: 1.03;
+  text-wrap: balance;
 }
 
 .encouragement {
@@ -318,11 +319,13 @@ h1 {
 
 dialog {
   width: min(calc(100% - 32px), 420px);
+  max-height: min(90dvh, 700px);
   padding: 0;
   border: 0;
   border-radius: 24px;
   background: var(--surface);
   box-shadow: 0 30px 90px rgba(25, 22, 17, 0.25);
+  overflow-y: auto;
 }
 
 dialog::backdrop { background: rgba(22, 21, 18, 0.45); backdrop-filter: blur(4px); }
@@ -366,15 +369,40 @@ dialog::backdrop { background: rgba(22, 21, 18, 0.45); backdrop-filter: blur(4px
   50% { transform: translateY(-5px) rotate(1deg); }
 }
 
+@media (max-width: 560px) {
+  .app-shell { width: calc(100% - 28px); }
+  .calendar-card,
+  .notes-card { border-radius: 20px; }
+  .calendar-grid,
+  .weekdays { gap: 4px; }
+  .calendar-day { font-size: 0.76rem; }
+  dialog { width: calc(100% - 24px); border-radius: 20px; }
+}
+
 @media (max-width: 420px) {
   .app-shell { width: min(100% - 24px, 560px); padding-top: 21px; }
   .topbar { margin-bottom: 26px; }
   .flame { width: 92px; }
   .day-count { padding-top: 38px; font-size: 1.7rem; }
+  h1 { font-size: clamp(2rem, 11vw, 2.8rem); }
   .dates { padding: 15px 14px; }
+  .dates strong { font-size: 0.8rem; }
   .calendar-card { padding: 18px 14px; }
+  .calendar-header { margin-bottom: 13px; }
+  .calendar-grid,
+  .weekdays { gap: 2px; }
   .notes-card { padding: 18px 14px; }
+  .notes-list { max-height: 280px; }
+  .primary-button { min-height: 56px; border-radius: 16px; }
+  .dialog-content { padding: 24px 20px; }
   .dialog-actions { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 340px) {
+  .dates { grid-template-columns: 1fr 1fr; }
+  .date-line { display: none; }
+  .calendar-card { padding-inline: 9px; }
+  .calendar-day { font-size: 0.72rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

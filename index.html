@@ -74,7 +74,10 @@
           <span>Registrar un día más</span>
           <span aria-hidden="true">＋</span>
         </button>
-        <button id="finish-streak" class="text-button" type="button" disabled>Terminar racha</button>
+        <div class="secondary-actions">
+          <button id="finish-streak" class="text-button" type="button" disabled>Terminar racha</button>
+          <button id="reset-streak" class="text-button reset-button" type="button" hidden>Reiniciar racha</button>
+        </div>
       </div>
     </main>
 
@@ -112,6 +115,18 @@
         <div class="dialog-actions">
           <button id="cancel-finish" class="secondary-button" type="button">Seguir contando</button>
           <button id="confirm-finish" class="danger-button" type="button">Sí, terminar</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="reset-dialog">
+      <div class="dialog-content">
+        <div class="dialog-icon reset-icon" aria-hidden="true">↻</div>
+        <h2>¿Reiniciar la racha?</h2>
+        <p>La cuenta volverá a cero. Tus notas anteriores seguirán guardadas.</p>
+        <div class="dialog-actions">
+          <button id="cancel-reset" class="secondary-button" type="button">Cancelar</button>
+          <button id="confirm-reset" class="danger-button" type="button">Sí, reiniciar</button>
         </div>
       </div>
     </dialog>

@@ -17,6 +17,7 @@ const elements = {
   notesList: document.querySelector("#notes-list"),
   add: document.querySelector("#add-day"),
   finish: document.querySelector("#finish-streak"),
+  reset: document.querySelector("#reset-streak"),
   noteDialog: document.querySelector("#note-dialog"),
   noteForm: document.querySelector("#note-form"),
   noteInput: document.querySelector("#daily-note"),
@@ -27,19 +28,28 @@ const elements = {
   dialog: document.querySelector("#finish-dialog"),
   cancelFinish: document.querySelector("#cancel-finish"),
   confirmFinish: document.querySelector("#confirm-finish"),
+  resetDialog: document.querySelector("#reset-dialog"),
+  cancelReset: document.querySelector("#cancel-reset"),
+  confirmReset: document.querySelector("#confirm-reset"),
 };
 
 document.querySelector("#prev-month").addEventListener("click", () => changeMonth(-1));
 document.querySelector("#next-month").addEventListener("click", () => changeMonth(1));
 elements.add.addEventListener("click", openNoteDialog);
-elements.finish.addEventListener("click", handleStreakAction);
+elements.finish.addEventListener("click", () => elements.dialog.showModal());
+elements.reset.addEventListener("click", () => elements.resetDialog.showModal());
 elements.noteInput.addEventListener("input", updateNoteForm);
 elements.noteForm.addEventListener("submit", submitNote);
 elements.cancelNote.addEventListener("click", closeNoteDialog);
 elements.cancelFinish.addEventListener("click", () => elements.dialog.close());
 elements.confirmFinish.addEventListener("click", finishStreak);
+elements.cancelReset.addEventListener("click", () => elements.resetDialog.close());
+elements.confirmReset.addEventListener("click", resetStreak);
 elements.dialog.addEventListener("click", (event) => {
   if (event.target === elements.dialog) elements.dialog.close();
+});
+elements.resetDialog.addEventListener("click", (event) => {
+  if (event.target === elements.resetDialog) elements.resetDialog.close();
 });
 
 render();
@@ -50,14 +60,6 @@ function openNoteDialog() {
   elements.noteDialog.showModal();
 }
 
-function handleStreakAction() {
-  if (state.finishedAt) {
-    startNewStreak();
-    return;
-  }
-  elements.dialog.showModal();
-}
-
 function startNewStreak() {
   state.currentStreakId = createStreakId();
   state.days = 0;
@@ -66,6 +68,11 @@ function startNewStreak() {
   viewedMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   saveState();
   render();
+}
+
+function resetStreak() {
+  startNewStreak();
+  elements.resetDialog.close();
 }
 
 function closeNoteDialog() {
@@ -131,8 +138,9 @@ function render() {
     : registeredToday
       ? "Día de hoy registrado"
       : "Registrar un día más";
-  elements.finish.disabled = !state.startedAt && !state.finishedAt;
-  elements.finish.textContent = state.finishedAt ? "Iniciar nueva racha" : "Terminar racha";
+  elements.finish.disabled = !state.startedAt;
+  elements.finish.hidden = Boolean(state.finishedAt);
+  elements.reset.hidden = !state.startedAt && !state.finishedAt;
   elements.message.textContent = messageFor(count, Boolean(state.finishedAt));
   renderCalendar();
   renderNotes();

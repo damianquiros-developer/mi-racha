@@ -13,6 +13,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -317,6 +318,17 @@ h1 {
 
 .text-button:disabled { opacity: 0.4; cursor: not-allowed; }
 
+.secondary-actions {
+  display: flex;
+  margin-top: 17px;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.secondary-actions .text-button { margin: 0; }
+.reset-button { color: var(--accent-dark); }
+
 dialog {
   width: min(calc(100% - 32px), 420px);
   max-height: min(90dvh, 700px);
@@ -360,6 +372,7 @@ dialog::backdrop { background: rgba(22, 21, 18, 0.45); backdrop-filter: blur(4px
 .note-form textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .note-form textarea::placeholder { color: #b1afa7; }
 .note-icon { color: var(--accent-dark); background: var(--accent-soft); }
+.reset-icon { color: var(--accent-dark); background: var(--accent-soft); }
 .note-meta { display: flex; justify-content: space-between; margin: 8px 2px 20px; color: var(--muted); font-size: 0.68rem; }
 .save-note-button { border: 0; color: white; background: var(--ink); }
 .save-note-button:disabled { color: #a6a59e; background: #e4e1da; cursor: not-allowed; }

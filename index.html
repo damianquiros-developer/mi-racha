@@ -58,6 +58,17 @@
         <div id="calendar-grid" class="calendar-grid" role="grid" aria-label="Calendario de la racha"></div>
       </section>
 
+      <section class="notes-card" aria-labelledby="notes-title">
+        <div class="notes-header">
+          <div>
+            <p class="section-kicker">Tu registro</p>
+            <h2 id="notes-title">Notas diarias</h2>
+          </div>
+          <span id="notes-count" class="notes-count">0</span>
+        </div>
+        <div id="notes-list" class="notes-list" aria-live="polite"></div>
+      </section>
+
       <div class="actions">
         <button id="add-day" class="primary-button" type="button">
           <span>Registrar un día más</span>
@@ -66,6 +77,32 @@
         <button id="finish-streak" class="text-button" type="button" disabled>Terminar racha</button>
       </div>
     </main>
+
+    <dialog id="note-dialog">
+      <form id="note-form" class="dialog-content note-form">
+        <div class="dialog-icon note-icon" aria-hidden="true">✎</div>
+        <h2>Nota del día</h2>
+        <p>Escribe algo antes de sumar un día a tu racha.</p>
+        <label for="daily-note">¿Cómo te fue hoy?</label>
+        <textarea
+          id="daily-note"
+          name="note"
+          maxlength="280"
+          rows="5"
+          placeholder="Hoy me sentí..."
+          required
+          autofocus
+        ></textarea>
+        <div class="note-meta">
+          <span id="note-date"></span>
+          <span id="character-count">0 / 280</span>
+        </div>
+        <div class="dialog-actions">
+          <button id="cancel-note" class="secondary-button" type="button">Cancelar</button>
+          <button id="save-note" class="save-note-button" type="submit" disabled>Guardar día</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog id="finish-dialog">
       <div class="dialog-content">

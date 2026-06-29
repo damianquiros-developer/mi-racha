@@ -13,8 +13,17 @@ const elements = {
   end: document.querySelector("#end-date"),
   month: document.querySelector("#month-label"),
   grid: document.querySelector("#calendar-grid"),
+  notesCount: document.querySelector("#notes-count"),
+  notesList: document.querySelector("#notes-list"),
   add: document.querySelector("#add-day"),
   finish: document.querySelector("#finish-streak"),
+  noteDialog: document.querySelector("#note-dialog"),
+  noteForm: document.querySelector("#note-form"),
+  noteInput: document.querySelector("#daily-note"),
+  noteDate: document.querySelector("#note-date"),
+  characterCount: document.querySelector("#character-count"),
+  cancelNote: document.querySelector("#cancel-note"),
+  saveNote: document.querySelector("#save-note"),
   dialog: document.querySelector("#finish-dialog"),
   cancelFinish: document.querySelector("#cancel-finish"),
   confirmFinish: document.querySelector("#confirm-finish"),
@@ -22,8 +31,11 @@ const elements = {
 
 document.querySelector("#prev-month").addEventListener("click", () => changeMonth(-1));
 document.querySelector("#next-month").addEventListener("click", () => changeMonth(1));
-elements.add.addEventListener("click", registerDay);
+elements.add.addEventListener("click", openNoteDialog);
 elements.finish.addEventListener("click", () => elements.dialog.showModal());
+elements.noteInput.addEventListener("input", updateNoteForm);
+elements.noteForm.addEventListener("submit", submitNote);
+elements.cancelNote.addEventListener("click", closeNoteDialog);
 elements.cancelFinish.addEventListener("click", () => elements.dialog.close());
 elements.confirmFinish.addEventListener("click", finishStreak);
 elements.dialog.addEventListener("click", (event) => {
@@ -32,7 +44,34 @@ elements.dialog.addEventListener("click", (event) => {
 
 render();
 
-function registerDay() {
+function openNoteDialog() {
+  if (state.finishedAt) return;
+  const nextDate = state.startedAt ? addDays(parseDate(state.startedAt), state.days) : today;
+  elements.noteDate.textContent = shortDate(nextDate);
+  elements.noteDialog.showModal();
+}
+
+function closeNoteDialog() {
+  elements.noteDialog.close();
+  elements.noteForm.reset();
+  updateNoteForm();
+}
+
+function updateNoteForm() {
+  const length = elements.noteInput.value.length;
+  elements.characterCount.textContent = `${length} / 280`;
+  elements.saveNote.disabled = !elements.noteInput.value.trim();
+}
+
+function submitNote(event) {
+  event.preventDefault();
+  const note = elements.noteInput.value.trim();
+  if (!note) return;
+  registerDay(note);
+  closeNoteDialog();
+}
+
+function registerDay(note) {
   if (state.finishedAt) return;
 
   if (!state.startedAt) {
@@ -43,6 +82,7 @@ function registerDay() {
   }
 
   const latest = addDays(parseDate(state.startedAt), state.days - 1);
+  state.notes.push({ date: dateKey(latest), text: note });
   viewedMonth = new Date(latest.getFullYear(), latest.getMonth(), 1);
   saveState();
   render();
@@ -73,6 +113,32 @@ function render() {
   elements.finish.disabled = !state.startedAt || Boolean(state.finishedAt);
   elements.message.textContent = messageFor(count, Boolean(state.finishedAt));
   renderCalendar();
+  renderNotes();
+}
+
+function renderNotes() {
+  elements.notesCount.textContent = state.notes.length;
+  elements.notesList.replaceChildren();
+
+  if (state.notes.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "notes-empty";
+    empty.textContent = "Tus notas aparecerán aquí al registrar cada día.";
+    elements.notesList.appendChild(empty);
+    return;
+  }
+
+  [...state.notes].reverse().forEach((note) => {
+    const entry = document.createElement("article");
+    const date = document.createElement("time");
+    const text = document.createElement("p");
+    entry.className = "note-entry";
+    date.dateTime = note.date;
+    date.textContent = shortDate(parseDate(note.date));
+    text.textContent = note.text;
+    entry.append(date, text);
+    elements.notesList.appendChild(entry);
+  });
 }
 
 function renderCalendar() {
@@ -110,11 +176,16 @@ function renderCalendar() {
 function loadState() {
   try {
     const value = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (value && Number.isInteger(value.days) && value.days >= 0) return value;
+    if (value && Number.isInteger(value.days) && value.days >= 0) {
+      value.notes = Array.isArray(value.notes)
+        ? value.notes.filter((note) => note && typeof note.date === "string" && typeof note.text === "string")
+        : [];
+      return value;
+    }
   } catch (error) {
     console.warn("No fue posible recuperar la racha guardada.", error);
   }
-  return { days: 0, startedAt: null, finishedAt: null };
+  return { days: 0, startedAt: null, finishedAt: null, notes: [] };
 }
 
 function saveState() {
